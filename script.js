@@ -190,7 +190,7 @@ function attachListeners() {
         btn.onclick = e => {
             const li = e.target.closest("li");
             const index = Number(li.dataset.index);
-            if (!confirm("Are you sure you want to delete this task?")) return;
+            if (!confirm(`Are you sure you want to delete "${tasks[index].text}"?`)) return;
 
             tasks.splice(index, 1);
             originalTaskOrder.splice(index, 1); // Also remove from original order
@@ -215,8 +215,8 @@ function attachListeners() {
         const li = e.target.closest("li");
 
         if (e.target.checked) {
-            // use inline style so it reliably overrides existing bg classes
-            li.style.backgroundColor = '#3b82f6'; // Tailwind bg-blue-300 hex
+    
+            li.style.backgroundColor = '#3b82f6'; 
         } else {
             li.style.backgroundColor = '';
         }
