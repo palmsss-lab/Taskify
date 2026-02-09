@@ -305,9 +305,9 @@ function enableEditing() {
                 if (e.key === "Escape") finishEdit(false);
             };
 
-            // On blur, cancel the edit (don't attempt to save) so clicking outside won't trigger validation alerts
+            // On blur, save the edit
             input.onblur = () => setTimeout(() => {
-                if (document.activeElement !== input) finishEdit(false);
+                if (document.activeElement !== input) finishEdit(true);
             }, 0);
         };
 
