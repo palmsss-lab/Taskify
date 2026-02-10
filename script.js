@@ -71,8 +71,6 @@ let isSortedAZ = false;
 let draggedIndex = null;
 let draggedElement = null;
 let dropTargetIndex = null;
-let touchDragging = false;
-let dragAndDropInitialized = false;
 
 // Event listeners
 addBtn.addEventListener("click", addTask);
@@ -371,49 +369,36 @@ function enableDragAndDrop() {
             }
             displayTask();
         };
-    });
 
-    // Attach touch listeners only once
-    if (!dragAndDropInitialized) {
-        dragAndDropInitialized = true;
+        // Mobile touch drag and drop
+        let touchStartIndex = null;
+        let touchStartTime = null;
 
-        document.addEventListener('touchstart', (e) => {
+        li.addEventListener('touchstart', (e) => {
             if (isEditing) return;
-            const li = e.target.closest('li');
-            if (!li || !taskList.contains(li)) return;
-            touchDragging = true;
-            draggedIndex = Number(li.dataset.index);
+            touchStartIndex = Number(li.dataset.index);
+            touchStartTime = Date.now();
             draggedElement = li;
-            dropTargetIndex = draggedIndex;
             li.classList.add('touch-dragging');
-            console.log('Touch start on item:', draggedIndex);
         }, { passive: true });
 
-        document.addEventListener('touchmove', (e) => {
-            if (!touchDragging || isEditing || draggedIndex === null) return;
-            e.preventDefault();
-            const touch = e.touches[0];
-            const target = document.elementFromPoint(touch.clientX, touch.clientY);
-            const targetLi = target && target.closest('li');
-            if (!targetLi || !taskList.contains(targetLi)) return;
-            const newIndex = Number(targetLi.dataset.index);
-            if (newIndex !== dropTargetIndex) {
-                dropTargetIndex = newIndex;
-                console.log('Dragging over item:', dropTargetIndex);
-            }
-        }, { passive: false });
+        li.addEventListener('touchend', (e) => {
+            if (!touchStartIndex && touchStartIndex !== 0) return;
+            const touchEndTime = Date.now();
+            const touchDuration = touchEndTime - touchStartTime;
 
-        document.addEventListener('touchend', (e) => {
-            if (!touchDragging) return;
-            console.log('Touch end - dragged:', draggedIndex, 'target:', dropTargetIndex);
-            touchDragging = false;
-            if (draggedElement) draggedElement.classList.remove('touch-dragging');
-            
-            if (dropTargetIndex !== null && dropTargetIndex !== draggedIndex) {
-                const draggedTask = tasks[draggedIndex];
-                tasks.splice(draggedIndex, 1);
-                const insertIndex = dropTargetIndex > draggedIndex ? dropTargetIndex - 1 : dropTargetIndex;
-                tasks.splice(insertIndex, 0, draggedTask);
+            li.classList.remove('touch-dragging');
+
+            // Get the element the finger is over when releasing
+            const touch = e.changedTouches[0];
+            const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
+            const targetLi = targetElement && targetElement.closest('li');
+
+            if (targetLi && targetLi !== li) {
+                const targetIndex = Number(targetLi.dataset.index);
+                
+                // Swap the tasks
+                [tasks[touchStartIndex], tasks[targetIndex]] = [tasks[targetIndex], tasks[touchStartIndex]];
                 
                 saveTasks();
                 if (!isSortedAZ) {
@@ -421,19 +406,19 @@ function enableDragAndDrop() {
                 }
                 displayTask();
             }
-            draggedIndex = null;
+
+            touchStartIndex = null;
+            touchStartTime = null;
             draggedElement = null;
-            dropTargetIndex = null;
         }, { passive: true });
 
-        document.addEventListener('touchcancel', (e) => {
-            if (draggedElement) draggedElement.classList.remove('touch-dragging');
-            touchDragging = false;
-            draggedIndex = null;
+        li.addEventListener('touchcancel', (e) => {
+            li.classList.remove('touch-dragging');
+            touchStartIndex = null;
+            touchStartTime = null;
             draggedElement = null;
-            dropTargetIndex = null;
         }, { passive: true });
-    }
+    });
 }
 
 
