@@ -21,5 +21,14 @@
 /* Completed state should show green in dark mode */
 .dark .bg-green-500 { background-color: var(--color-green-500) !important; color: black !important; }
 .dark .bg-green-600 { background-color: var(--color-green-600) !important; color: #fff !important; }
+/* Drag state - visual feedback */
+li.touch-dragging { 
+  transition: none !important;
+  opacity: 0.8;
+  background-color: rgba(59, 130, 246, 0.3) !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  transform: scale(1.02);
+  z-index: 50;
+}
 /* Checkbox accent */
 .dark .task-checkbox { accent-color: var(--color-black); }
