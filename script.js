@@ -362,6 +362,10 @@ function enableDragAndDrop() {
             [tasks[draggedIndex], tasks[targetIndex]] = [tasks[targetIndex], tasks[draggedIndex]];
 
             saveTasks();
+            // Update originalTaskOrder if not in sorted view
+            if (!isSortedAZ) {
+                originalTaskOrder = [...tasks];
+            }
             displayTask(); // re-render list
         };
 
@@ -385,16 +389,29 @@ function enableDragAndDrop() {
                 if (!targetLi) return;
                 const targetIndex = Number(targetLi.dataset.index);
                 if (targetIndex !== draggedIndex) {
+                    // Swap in tasks array
                     [tasks[draggedIndex], tasks[targetIndex]] = [tasks[targetIndex], tasks[draggedIndex]];
+                    // Swap in DOM elements
+                    const taskListItems = Array.from(taskList.querySelectorAll('li'));
+                    const draggedItem = taskListItems[draggedIndex];
+                    const targetItem = taskListItems[targetIndex];
+                    if (draggedIndex < targetIndex) {
+                        targetItem.parentNode.insertBefore(draggedItem, targetItem.nextSibling);
+                    } else {
+                        targetItem.parentNode.insertBefore(draggedItem, targetItem);
+                    }
                     draggedIndex = targetIndex;
-                    saveTasks();
-                    displayTask();
                 }
             }, { passive: false });
 
             li.addEventListener('touchend', (e) => {
                 touchDragging = false;
                 li.classList.remove('touch-dragging');
+                saveTasks();
+                // Update originalTaskOrder if not in sorted view
+                if (!isSortedAZ) {
+                    originalTaskOrder = [...tasks];
+                }
                 draggedIndex = null;
             }, { passive: true });
 
